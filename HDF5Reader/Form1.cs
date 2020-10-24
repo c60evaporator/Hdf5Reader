@@ -15,7 +15,7 @@ namespace HDF5Reader
         {
             InitializeComponent();
         }
-        private Hdf5Reader hdf5Reader;
+        private Hdf5Reader hdf5Reader = null;
 
         private void dataGridViewDropHdf5_DragDrop(object sender, DragEventArgs e)
         {
@@ -56,6 +56,46 @@ namespace HDF5Reader
             {
                 //ファイル以外は受け付けない
                 e.Effect = DragDropEffects.None;
+            }
+        }
+
+        private void dataGridViewDropHdf5_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            //「選択グループのみ」がチェックされているとき、クリックした最上位グループ内の一覧を表示
+            if (radioButtonSelectedGroupOnly.Checked)
+            {
+                var groupName = dataGridViewDropHdf5[0, e.RowIndex].Value.ToString();
+                hdf5Reader.DisplayLowerGroupsAndData(dataGridViewGroupDetail, "./" + groupName);
+            }
+        }
+
+        private void dataGridViewGroupDetail_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
+        {
+            var selectedName = dataGridViewGroupDetail[0, e.RowIndex].Value.ToString();
+            hdf5Reader.MoveToSelectedGroupOrData(dataGridViewGroupDetail, selectedName, radioButtonSelectedGroupOnly.Checked);
+        }
+
+        //RadioButtonチェック変更時の処理
+        private void radioButtonAllData_CheckedChanged(object sender, EventArgs e)
+        {
+            //HDF5ファイルが読み込まれているときのみ処理を進める
+            if(hdf5Reader != null)
+            {
+                //「全データ」チェック時、全データを表示
+                if (radioButtonAllData.Checked)
+                {
+                    hdf5Reader.DisplayAllData(dataGridViewGroupDetail);
+                }
+                //「選択グループのみ」にチェック変更時、選択された最上位フォルダの内容を表示
+                else
+                {
+                    var dataGridDropHdf5Selected = dataGridViewDropHdf5.SelectedCells;
+                    if (dataGridDropHdf5Selected.Count == 1)
+                    {
+                        var groupName = dataGridDropHdf5Selected[0].Value.ToString();
+                        hdf5Reader.DisplayLowerGroupsAndData(dataGridViewGroupDetail, "./" + groupName);
+                    }
+                }
             }
         }
     }

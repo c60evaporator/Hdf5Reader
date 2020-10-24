@@ -18,7 +18,7 @@ namespace HDF5Reader
         private DataGridView _dataGridViewDropHdf5;//HDF5をドラッグ＆ドロップするDataGridView
         private List<string> _groupList;//グループ一覧
         private List<string> _dataList;//データ一覧
-        private string _currentGroup;//現在の
+        private string _currentGroup;//現在
 
         //コンストラクタ
         public Hdf5Reader(
@@ -48,9 +48,14 @@ namespace HDF5Reader
                 .Select(a => a.Split('/')[1])
                 .ToList();
             DisplayStrListToDataGrid(topGroups, _dataGridViewDropHdf5, "最上位グループ", false);
-            //列幅をDataGridViewの幅に合わせ、列名表示OFFに
+            //列幅をDataGridViewの幅に合わせ、列名＆行名表示OFFに
             _dataGridViewDropHdf5.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             _dataGridViewDropHdf5.ColumnHeadersVisible = false;
+            _dataGridViewDropHdf5.AllowUserToAddRows = false;
+            _dataGridViewDropHdf5.AllowUserToDeleteRows = false;
+            _dataGridViewDropHdf5.AllowUserToResizeRows = false;
+            _dataGridViewDropHdf5.ReadOnly = true;
+            H5.Close();
         }
 
         //階層構造を再帰的に探索
@@ -104,7 +109,62 @@ namespace HDF5Reader
             }
             //データグリッドにデータテーブルを登録
             dataGridView.DataSource = dataTable;
+            
+            //列幅をDataGridViewの幅に合わせ、列名＆行名表示OFFに
+            dataGridView.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            dataGridView.ColumnHeadersVisible = false;
             dataGridView.RowHeadersVisible = false;
+            dataGridView.AllowUserToAddRows = false;
+            dataGridView.AllowUserToDeleteRows = false;
+            dataGridView.AllowUserToResizeRows = false;
+            dataGridView.ReadOnly = true;
+        }
+
+        //全データをDataGridViewに表示
+        public void DisplayAllData(DataGridView dataGridView)
+        {
+            DisplayStrListToDataGrid(_dataList, dataGridView, "データ一覧", false);
+        }
+
+        //グループ内の下位グループ＆データをDataGridViewに表示
+        public void DisplayLowerGroupsAndData(DataGridView dataGridView, string upperGroup)
+        {
+            _currentGroup = upperGroup;
+            string searchStr = upperGroup + "/";//下位検索用文字列
+            //下位グループの一覧を取得
+            var lowerGroups = _groupList
+                .Where(a => a.Length - a.Replace(searchStr, "").Length > 0 && a.Replace(searchStr, "").Length - a.Replace(searchStr, "").Replace("/", "").Length == 0)
+                .ToList();
+            //下位データの一覧を取得
+            var lowerData = _dataList
+                .Where(a => a.Length - a.Replace(searchStr, "").Length > 0 && a.Replace(searchStr, "").Length - a.Replace(searchStr, "").Replace("/", "").Length == 0)
+                .ToList();
+            //下位グループと下位データ一覧をDataGridViewに表示
+            DisplayStrListToDataGrid(lowerGroups.Concat(lowerData).ToList(), dataGridView, "下位グループとデータ一覧", true);
+            
+        }
+
+        //上位グループの内容をDataGridViewに表示
+        private void DisplayUpperGroup(DataGridView dataGridView, string lowerGroup)
+        {
+            var groupSplit = _currentGroup.Split('/').ToList();
+            if(groupSplit.Count >= 2)
+            {
+                groupSplit.RemoveAt(groupSplit.Count - 1);
+                DisplayLowerGroupsAndData(dataGridView, string.Join("/", groupSplit));
+            }
+        }
+
+        public void MoveToSelectedGroupOrData(DataGridView dataGridView, string selectedRow, bool selectedGroupOnly)
+        {
+            //グループを移動（「選択グループのみ」がチェックされているときのみ）
+            if (selectedGroupOnly)
+            {
+                //グループをクリックしたとき、下位のグループを表示する
+                if (_groupList.Contains(selectedRow)) DisplayLowerGroupsAndData(dataGridView, selectedRow);
+                //「戻る」をクリックしたとき、上位のグループを表示する
+                else if (selectedRow == "戻る") DisplayUpperGroup(dataGridView, selectedRow);
+            }
         }
     }
 }
