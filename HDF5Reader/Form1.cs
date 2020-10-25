@@ -39,7 +39,9 @@ namespace HDF5Reader
                 fName[0],
                 toolStripStatusLabel1,
                 statusStrip1,
-                dataGridViewDropHdf5);
+                dataGridViewDropHdf5,
+                dataGridViewGroupDetail,
+                dataGridViewData);
             hdf5Reader.ReadHdf5();
             labelDropHdf5.Text = "最上位グループ一覧";
         }
@@ -65,14 +67,14 @@ namespace HDF5Reader
             if (radioButtonSelectedGroupOnly.Checked)
             {
                 var groupName = dataGridViewDropHdf5[0, e.RowIndex].Value.ToString();
-                hdf5Reader.DisplayLowerGroupsAndData(dataGridViewGroupDetail, "./" + groupName);
+                hdf5Reader.DisplayLowerGroupsAndData("./" + groupName);
             }
         }
 
         private void dataGridViewGroupDetail_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
             var selectedName = dataGridViewGroupDetail[0, e.RowIndex].Value.ToString();
-            hdf5Reader.MoveToSelectedGroupOrData(dataGridViewGroupDetail, selectedName, radioButtonSelectedGroupOnly.Checked);
+            hdf5Reader.MoveToSelectedGroupOrData(selectedName, radioButtonSelectedGroupOnly.Checked);
         }
 
         //RadioButtonチェック変更時の処理
@@ -84,7 +86,7 @@ namespace HDF5Reader
                 //「全データ」チェック時、全データを表示
                 if (radioButtonAllData.Checked)
                 {
-                    hdf5Reader.DisplayAllData(dataGridViewGroupDetail);
+                    hdf5Reader.DisplayAllData();
                 }
                 //「選択グループのみ」にチェック変更時、選択された最上位フォルダの内容を表示
                 else
@@ -93,7 +95,7 @@ namespace HDF5Reader
                     if (dataGridDropHdf5Selected.Count == 1)
                     {
                         var groupName = dataGridDropHdf5Selected[0].Value.ToString();
-                        hdf5Reader.DisplayLowerGroupsAndData(dataGridViewGroupDetail, "./" + groupName);
+                        hdf5Reader.DisplayLowerGroupsAndData("./" + groupName);
                     }
                 }
             }

@@ -12,10 +12,15 @@ namespace HDF5Reader
     {
         //HDF5はこちら参考 http://memo-memo-and-memo.asablo.jp/blog/2013/02/06/6714210
         //クラス内変数
-        private string _hdf5Path;//検索対象フォルダを指定するためのCSVファイル
+        private int MAX_DATASET_COLS = 10;//読み込むデータセットの最大列数
+        private int MAX_DATASET_ROWS = 10000;//読み込むデータセットの最大行数
+        private string _hdf5Path;//読み込んだHDF5ファイルのパス
         private ToolStripStatusLabel _toolStripStatusLabel;//処理内容表示用のToolStripStatusLabel
         private StatusStrip _statusStrip;//処理内容表示用のStatusStrip
         private DataGridView _dataGridViewDropHdf5;//HDF5をドラッグ＆ドロップするDataGridView
+        private DataGridView _dataGridViewGroupDetail;//グループ内容をを表示するDataGridView
+        private DataGridView _dataGridViewData;//データを表示するDataGridView
+        private H5FileId _fileId;//読み込んだHDF5ファイルのFileID
         private List<string> _groupList;//グループ一覧
         private List<string> _dataList;//データ一覧
         private string _currentGroup;//現在
@@ -25,12 +30,16 @@ namespace HDF5Reader
             string hdf5Path,
             ToolStripStatusLabel toolStripStatusLabel,
             StatusStrip StatusStrip,
-            DataGridView dataGridViewDropHdf5)
+            DataGridView dataGridViewDropHdf5,
+            DataGridView dataGridViewGroupDetail,
+            DataGridView dataGridViewData)
         {
             _hdf5Path = hdf5Path;
             _toolStripStatusLabel = toolStripStatusLabel;
             _statusStrip = StatusStrip;
             _dataGridViewDropHdf5 = dataGridViewDropHdf5;
+            _dataGridViewGroupDetail = dataGridViewGroupDetail;
+            _dataGridViewData = dataGridViewData;
         }
 
         //Hdf5を読み込んで、最上位グループをDataGridViewに表示
@@ -38,10 +47,10 @@ namespace HDF5Reader
         {
             //HDF5読込
             H5.Open();
-            var fileId = H5F.open(_hdf5Path, H5F.OpenMode.ACC_RDONLY);
+            _fileId = H5F.open(_hdf5Path, H5F.OpenMode.ACC_RDONLY);
             _groupList = new List<string>();
             _dataList = new List<string>();
-            GetSubGroupsRepeat(fileId, ".");
+            GetSubGroupsRepeat(_fileId, ".");
             //最上位グループを表示
             var topGroups = _groupList
                 .Where(a => a.Length - a.Replace("/", "").Length == 1)
@@ -55,7 +64,6 @@ namespace HDF5Reader
             _dataGridViewDropHdf5.AllowUserToDeleteRows = false;
             _dataGridViewDropHdf5.AllowUserToResizeRows = false;
             _dataGridViewDropHdf5.ReadOnly = true;
-            H5.Close();
         }
 
         //階層構造を再帰的に探索
@@ -81,6 +89,7 @@ namespace HDF5Reader
                         break;
                 }
             }
+            H5G.close(groupId);
             //サブグループが存在するとき、再帰的に走査
             foreach (var subGroup in subGroups)
             {
@@ -120,14 +129,47 @@ namespace HDF5Reader
             dataGridView.ReadOnly = true;
         }
 
-        //全データをDataGridViewに表示
-        public void DisplayAllData(DataGridView dataGridView)
+        //2次元配列をデータテーブルに一覧表示
+        private void DisplayStrSquareArrayToDataGrid(string[,] strArray, DataGridView dataGridView)
         {
-            DisplayStrListToDataGrid(_dataList, dataGridView, "データ一覧", false);
+            DataTable dataTable = new DataTable();
+            var colSize = strArray.GetLength(0);
+            var rowSize = strArray.GetLength(1);
+            //カラムを追加
+            for(int j = 0; j < colSize; j++) dataTable.Columns.Add((j + 1).ToString());
+            //行を追加
+            for (int i = 0; i < rowSize; i++)
+            {
+                DataRow row = dataTable.NewRow();
+                for (int j = 0; j < colSize; j++) row[j] = strArray[j, i];
+                dataTable.Rows.Add(row);
+            }
+            //データグリッドにデータテーブルを登録
+            dataGridView.DataSource = dataTable;
+            //行ヘッダーに行番号を表示
+            for (int i = 0; i < rowSize; i++)
+            {
+                //行ヘッダーに行番号を表示
+                dataGridView.Rows[i].HeaderCell.Value = (i + 1).ToString();
+            }
+            dataGridView.RowHeadersWidth = 60;
+            //列幅をDataGridViewの幅に合わせ、列名＆行名表示OFFに
+            dataGridView.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            dataGridView.ColumnHeadersVisible = false;
+            dataGridView.AllowUserToAddRows = false;
+            dataGridView.AllowUserToDeleteRows = false;
+            dataGridView.AllowUserToResizeRows = false;
+            dataGridView.ReadOnly = true;
+        }
+
+        //全データをDataGridViewGroupDetailに表示
+        public void DisplayAllData()
+        {
+            DisplayStrListToDataGrid(_dataList, _dataGridViewGroupDetail, "データ一覧", false);
         }
 
         //グループ内の下位グループ＆データをDataGridViewに表示
-        public void DisplayLowerGroupsAndData(DataGridView dataGridView, string upperGroup)
+        public void DisplayLowerGroupsAndData(string upperGroup)
         {
             _currentGroup = upperGroup;
             string searchStr = upperGroup + "/";//下位検索用文字列
@@ -140,31 +182,81 @@ namespace HDF5Reader
                 .Where(a => a.Length - a.Replace(searchStr, "").Length > 0 && a.Replace(searchStr, "").Length - a.Replace(searchStr, "").Replace("/", "").Length == 0)
                 .ToList();
             //下位グループと下位データ一覧をDataGridViewに表示
-            DisplayStrListToDataGrid(lowerGroups.Concat(lowerData).ToList(), dataGridView, "下位グループとデータ一覧", true);
-            
+            DisplayStrListToDataGrid(lowerGroups.Concat(lowerData).ToList(), _dataGridViewGroupDetail, "下位グループとデータ一覧", true);
         }
 
         //上位グループの内容をDataGridViewに表示
-        private void DisplayUpperGroup(DataGridView dataGridView, string lowerGroup)
+        private void DisplayUpperGroup(string lowerGroup)
         {
-            var groupSplit = _currentGroup.Split('/').ToList();
-            if(groupSplit.Count >= 2)
-            {
-                groupSplit.RemoveAt(groupSplit.Count - 1);
-                DisplayLowerGroupsAndData(dataGridView, string.Join("/", groupSplit));
-            }
+            var upperGroupName = GetUpperGroupName(lowerGroup);
+            if (upperGroupName != null) DisplayLowerGroupsAndData(upperGroupName);
         }
 
-        public void MoveToSelectedGroupOrData(DataGridView dataGridView, string selectedRow, bool selectedGroupOnly)
+        //上位グループ名を取得
+        private string GetUpperGroupName(string lowerGroup)
+        {
+            var groupSplit = _currentGroup.Split('/').ToList();
+            if (groupSplit.Count >= 2)
+            {
+                groupSplit.RemoveAt(groupSplit.Count - 1);
+                return string.Join("/", groupSplit);
+            }
+            else return null;
+        }
+
+        //DataGridViewGroupDetailをダブルクリックしたときの処理（下位グループ表示 or 上位グループに戻る or データを表示）
+        public void MoveToSelectedGroupOrData(string selectedRow, bool selectedGroupOnly)
         {
             //グループを移動（「選択グループのみ」がチェックされているときのみ）
             if (selectedGroupOnly)
             {
                 //グループをクリックしたとき、下位のグループを表示する
-                if (_groupList.Contains(selectedRow)) DisplayLowerGroupsAndData(dataGridView, selectedRow);
+                if (_groupList.Contains(selectedRow)) DisplayLowerGroupsAndData(selectedRow);
                 //「戻る」をクリックしたとき、上位のグループを表示する
-                else if (selectedRow == "戻る") DisplayUpperGroup(dataGridView, selectedRow);
+                else if (selectedRow == "戻る") DisplayUpperGroup(selectedRow);
             }
+            //データを表示
+            if (_dataList.Contains(selectedRow)) DisplayData(selectedRow);
+        }
+
+        private void DisplayData(string datasetName)
+        {
+            //データ格納用配列(初期値としてdouble.MinValueを入力)
+            double[,] doubleArray = new double[MAX_DATASET_COLS,MAX_DATASET_ROWS];
+            for(int j = 0; j < MAX_DATASET_COLS; j++)
+            {
+                for (int i = 0; i < MAX_DATASET_ROWS; i++) doubleArray[j, i] = double.MinValue;
+            }
+            //hdf5ファイルのDataSetから上記配列にデータ格納
+            var dataSetId = H5D.open(_fileId, datasetName);
+            var dataTypeId = H5D.getType(dataSetId);
+            H5Array<double> array = new H5Array<double>(doubleArray);
+            H5D.read(dataSetId, dataTypeId, array);
+            //double.MinValue以外の数値が現れるIndex以前のデータのみ抽出
+            var maxRow = 0;
+            var maxCol = 0;
+            for (int j = 0; j < MAX_DATASET_COLS; j++)
+            {
+                for (int i = 0; i < MAX_DATASET_ROWS; i++)
+                {
+                    if(doubleArray[j, i] != double.MinValue)
+                    {
+                        if (i > maxRow) maxRow = i;
+                        if (j > maxCol) maxCol = j;
+                    }
+                }
+            }
+            //maxRow+1 × maxCol+1サイズの配列に再格納する
+            string[,] displayArray = new string[maxCol + 1, maxRow + 1];
+            for (int j = 0; j <= maxCol; j++)
+            {
+                for (int i = 0; i <= maxRow; i++)
+                {
+                    displayArray[j, i] = doubleArray[j, i].ToString();
+                }
+            }
+            //DataGridViewに表示
+            DisplayStrSquareArrayToDataGrid(displayArray, _dataGridViewData);
         }
     }
 }
