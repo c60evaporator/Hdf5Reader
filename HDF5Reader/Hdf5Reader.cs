@@ -67,6 +67,11 @@ namespace HDF5Reader
             _dataGridViewDropHdf5.ReadOnly = true;
         }
 
+        public void CloseHdf5()
+        {
+            H5F.close(_fileId);
+        }
+
         //階層構造を再帰的に探索
         private void GetSubGroupsRepeat(H5FileId fileId, string groupName)
         {
@@ -248,6 +253,9 @@ namespace HDF5Reader
             }
             //DataGridViewに表示
             DisplayStrSquareArrayToDataGrid(displayArray, _dataGridViewData);
+            H5S.close(space);
+            H5T.close(dataTypeId);
+            H5D.close(dataSetId);
         }
     }
 }

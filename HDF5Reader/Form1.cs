@@ -16,6 +16,11 @@ namespace HDF5Reader
             InitializeComponent();
         }
         private Hdf5Reader hdf5Reader = null;
+        
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            hdf5Reader.CloseHdf5();
+        }
 
         private void dataGridViewDropHdf5_DragDrop(object sender, DragEventArgs e)
         {
@@ -100,5 +105,6 @@ namespace HDF5Reader
                 }
             }
         }
+
     }
 }
