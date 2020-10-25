@@ -11,9 +11,10 @@ namespace HDF5Reader
     class Hdf5Reader
     {
         //HDF5はこちら参考 http://memo-memo-and-memo.asablo.jp/blog/2013/02/06/6714210
+        //定数
+        private List<H5T.H5TClass> VALUE_H5TCLASSES = new List<H5T.H5TClass>() { H5T.H5TClass.FLOAT, H5T.H5TClass.INTEGER };//値型として扱うH5TClass
+        private List<H5T.H5TClass> MATRIX_H5TCLASSES = new List<H5T.H5TClass>() { H5T.H5TClass.COMPOUND };//行列型として扱うH5TClass
         //クラス内変数
-        private int MAX_DATASET_COLS = 10;//読み込むデータセットの最大列数
-        private int MAX_DATASET_ROWS = 10000;//読み込むデータセットの最大行数
         private string _hdf5Path;//読み込んだHDF5ファイルのパス
         private ToolStripStatusLabel _toolStripStatusLabel;//処理内容表示用のToolStripStatusLabel
         private StatusStrip _statusStrip;//処理内容表示用のStatusStrip
@@ -219,40 +220,30 @@ namespace HDF5Reader
             if (_dataList.Contains(selectedRow)) DisplayData(selectedRow);
         }
 
+        //DataSetの内容をDataGridViewに表示
         private void DisplayData(string datasetName)
         {
-            //データ格納用配列(初期値としてdouble.MinValueを入力)
-            double[,] doubleArray = new double[MAX_DATASET_COLS,MAX_DATASET_ROWS];
-            for(int j = 0; j < MAX_DATASET_COLS; j++)
-            {
-                for (int i = 0; i < MAX_DATASET_ROWS; i++) doubleArray[j, i] = double.MinValue;
-            }
-            //hdf5ファイルのDataSetから上記配列にデータ格納
+            //hdf5ファイルのDataSetを開く
             var dataSetId = H5D.open(_fileId, datasetName);
             var dataTypeId = H5D.getType(dataSetId);
+            var space = H5D.getSpace(dataSetId);
+            var cls = H5T.getClass(dataTypeId);
+            //列数、行数のカウント
+            int colSize = 1;
+            if(MATRIX_H5TCLASSES.Contains(cls)) colSize = H5T.getNMembers(dataTypeId);
+            var rowSize = H5S.getSimpleExtentDims(space).First();
+            //データ格納
+            double[] doubleArray = new double[colSize * rowSize];//データ格納用配列
             H5Array<double> array = new H5Array<double>(doubleArray);
             H5D.read(dataSetId, dataTypeId, array);
-            //double.MinValue以外の数値が現れるIndex以前のデータのみ抽出
-            var maxRow = 0;
-            var maxCol = 0;
-            for (int j = 0; j < MAX_DATASET_COLS; j++)
+
+            //colSize × rowSizeの配列に再格納する
+            string[,] displayArray = new string[colSize, rowSize];
+            for (int j = 0; j < colSize; j++)
             {
-                for (int i = 0; i < MAX_DATASET_ROWS; i++)
+                for (int i = 0; i < rowSize; i++)
                 {
-                    if(doubleArray[j, i] != double.MinValue)
-                    {
-                        if (i > maxRow) maxRow = i;
-                        if (j > maxCol) maxCol = j;
-                    }
-                }
-            }
-            //maxRow+1 × maxCol+1サイズの配列に再格納する
-            string[,] displayArray = new string[maxCol + 1, maxRow + 1];
-            for (int j = 0; j <= maxCol; j++)
-            {
-                for (int i = 0; i <= maxRow; i++)
-                {
-                    displayArray[j, i] = doubleArray[j, i].ToString();
+                    displayArray[j, i] = doubleArray[j + i * colSize].ToString();
                 }
             }
             //DataGridViewに表示

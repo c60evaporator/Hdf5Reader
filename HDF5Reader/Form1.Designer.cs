@@ -37,9 +37,10 @@
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.radioButtonSelectedGroupOnly = new System.Windows.Forms.RadioButton();
             this.radioButtonAllData = new System.Windows.Forms.RadioButton();
+            this.label1 = new System.Windows.Forms.Label();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
-            this.label1 = new System.Windows.Forms.Label();
+            this.label2 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewDropHdf5)).BeginInit();
             this.tableLayoutPanel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewGroupDetail)).BeginInit();
@@ -89,6 +90,7 @@
             this.tableLayoutPanel1.Controls.Add(this.labelDropHdf5, 0, 0);
             this.tableLayoutPanel1.Controls.Add(this.groupBox1, 1, 2);
             this.tableLayoutPanel1.Controls.Add(this.label1, 1, 0);
+            this.tableLayoutPanel1.Controls.Add(this.label2, 2, 0);
             this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
             this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
@@ -169,6 +171,16 @@
             this.radioButtonAllData.UseVisualStyleBackColor = true;
             this.radioButtonAllData.CheckedChanged += new System.EventHandler(this.radioButtonAllData_CheckedChanged);
             // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.label1.Location = new System.Drawing.Point(191, 6);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(323, 19);
+            this.label1.TabIndex = 6;
+            this.label1.Text = "グループ内オブジェクト";
+            // 
             // statusStrip1
             // 
             this.statusStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
@@ -187,15 +199,15 @@
             this.toolStripStatusLabel1.Size = new System.Drawing.Size(25, 20);
             this.toolStripStatusLabel1.Text = "    ";
             // 
-            // label1
+            // label2
             // 
-            this.label1.AutoSize = true;
-            this.label1.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.label1.Location = new System.Drawing.Point(191, 6);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(323, 19);
-            this.label1.TabIndex = 6;
-            this.label1.Text = "グループ内オブジェクト";
+            this.label2.AutoSize = true;
+            this.label2.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.label2.Location = new System.Drawing.Point(520, 6);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(419, 19);
+            this.label2.TabIndex = 7;
+            this.label2.Text = "データ内容";
             // 
             // Form1
             // 
@@ -236,6 +248,7 @@
         private System.Windows.Forms.RadioButton radioButtonSelectedGroupOnly;
         private System.Windows.Forms.RadioButton radioButtonAllData;
         private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label label2;
     }
 }
 
