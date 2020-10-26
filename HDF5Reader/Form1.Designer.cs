@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             this.dataGridViewDropHdf5 = new System.Windows.Forms.DataGridView();
-            this.button1 = new System.Windows.Forms.Button();
+            this.buttonOutputCsv = new System.Windows.Forms.Button();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.dataGridViewGroupDetail = new System.Windows.Forms.DataGridView();
             this.dataGridViewData = new System.Windows.Forms.DataGridView();
@@ -38,15 +38,23 @@
             this.radioButtonSelectedGroupOnly = new System.Windows.Forms.RadioButton();
             this.radioButtonAllData = new System.Windows.Forms.RadioButton();
             this.label1 = new System.Windows.Forms.Label();
+            this.label2 = new System.Windows.Forms.Label();
+            this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.radioButtonOutputAllData = new System.Windows.Forms.RadioButton();
+            this.radioButtonOutputOnlyDisplayedData = new System.Windows.Forms.RadioButton();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
-            this.label2 = new System.Windows.Forms.Label();
+            this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.radioButtonShiftJis = new System.Windows.Forms.RadioButton();
+            this.radioButtonUtf8 = new System.Windows.Forms.RadioButton();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewDropHdf5)).BeginInit();
             this.tableLayoutPanel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewGroupDetail)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewData)).BeginInit();
             this.groupBox1.SuspendLayout();
+            this.groupBox2.SuspendLayout();
             this.statusStrip1.SuspendLayout();
+            this.groupBox3.SuspendLayout();
             this.SuspendLayout();
             // 
             // dataGridViewDropHdf5
@@ -60,45 +68,48 @@
             this.dataGridViewDropHdf5.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.dataGridViewDropHdf5.Name = "dataGridViewDropHdf5";
             this.dataGridViewDropHdf5.RowTemplate.Height = 24;
-            this.dataGridViewDropHdf5.Size = new System.Drawing.Size(182, 296);
+            this.dataGridViewDropHdf5.Size = new System.Drawing.Size(182, 272);
             this.dataGridViewDropHdf5.TabIndex = 0;
             this.dataGridViewDropHdf5.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridViewDropHdf5_CellClick);
             this.dataGridViewDropHdf5.DragDrop += new System.Windows.Forms.DragEventHandler(this.dataGridViewDropHdf5_DragDrop);
             this.dataGridViewDropHdf5.DragEnter += new System.Windows.Forms.DragEventHandler(this.dataGridViewDropHdf5_DragEnter);
             // 
-            // button1
+            // buttonOutputCsv
             // 
-            this.button1.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.button1.Location = new System.Drawing.Point(52, 333);
-            this.button1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(84, 29);
-            this.button1.TabIndex = 1;
-            this.button1.Text = "button1";
-            this.button1.UseVisualStyleBackColor = true;
+            this.buttonOutputCsv.Dock = System.Windows.Forms.DockStyle.Right;
+            this.buttonOutputCsv.Location = new System.Drawing.Point(141, 23);
+            this.buttonOutputCsv.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.buttonOutputCsv.Name = "buttonOutputCsv";
+            this.buttonOutputCsv.Size = new System.Drawing.Size(84, 68);
+            this.buttonOutputCsv.TabIndex = 1;
+            this.buttonOutputCsv.Text = "出力";
+            this.buttonOutputCsv.UseVisualStyleBackColor = true;
+            this.buttonOutputCsv.Click += new System.EventHandler(this.buttonOutputCsv_Click);
             // 
             // tableLayoutPanel1
             // 
-            this.tableLayoutPanel1.ColumnCount = 3;
+            this.tableLayoutPanel1.ColumnCount = 4;
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 20F));
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 35F));
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 45F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 20F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
             this.tableLayoutPanel1.Controls.Add(this.dataGridViewDropHdf5, 0, 1);
-            this.tableLayoutPanel1.Controls.Add(this.button1, 0, 2);
             this.tableLayoutPanel1.Controls.Add(this.dataGridViewGroupDetail, 1, 1);
             this.tableLayoutPanel1.Controls.Add(this.dataGridViewData, 2, 1);
             this.tableLayoutPanel1.Controls.Add(this.labelDropHdf5, 0, 0);
             this.tableLayoutPanel1.Controls.Add(this.groupBox1, 1, 2);
             this.tableLayoutPanel1.Controls.Add(this.label1, 1, 0);
             this.tableLayoutPanel1.Controls.Add(this.label2, 2, 0);
+            this.tableLayoutPanel1.Controls.Add(this.groupBox2, 3, 2);
+            this.tableLayoutPanel1.Controls.Add(this.groupBox3, 2, 2);
             this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
             this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 4;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 25F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 80F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 20F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 100F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 28F));
             this.tableLayoutPanel1.Size = new System.Drawing.Size(942, 433);
             this.tableLayoutPanel1.TabIndex = 2;
@@ -110,18 +121,19 @@
             this.dataGridViewGroupDetail.Location = new System.Drawing.Point(191, 28);
             this.dataGridViewGroupDetail.Name = "dataGridViewGroupDetail";
             this.dataGridViewGroupDetail.RowTemplate.Height = 24;
-            this.dataGridViewGroupDetail.Size = new System.Drawing.Size(323, 298);
+            this.dataGridViewGroupDetail.Size = new System.Drawing.Size(323, 274);
             this.dataGridViewGroupDetail.TabIndex = 2;
             this.dataGridViewGroupDetail.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridViewGroupDetail_CellDoubleClick);
             // 
             // dataGridViewData
             // 
             this.dataGridViewData.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.tableLayoutPanel1.SetColumnSpan(this.dataGridViewData, 2);
             this.dataGridViewData.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dataGridViewData.Location = new System.Drawing.Point(520, 28);
             this.dataGridViewData.Name = "dataGridViewData";
             this.dataGridViewData.RowTemplate.Height = 24;
-            this.dataGridViewData.Size = new System.Drawing.Size(419, 298);
+            this.dataGridViewData.Size = new System.Drawing.Size(419, 274);
             this.dataGridViewData.TabIndex = 3;
             // 
             // labelDropHdf5
@@ -141,9 +153,9 @@
             this.groupBox1.Controls.Add(this.radioButtonSelectedGroupOnly);
             this.groupBox1.Controls.Add(this.radioButtonAllData);
             this.groupBox1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.groupBox1.Location = new System.Drawing.Point(191, 332);
+            this.groupBox1.Location = new System.Drawing.Point(191, 308);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(323, 70);
+            this.groupBox1.Size = new System.Drawing.Size(323, 94);
             this.groupBox1.TabIndex = 5;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "表示法";
@@ -152,7 +164,7 @@
             // 
             this.radioButtonSelectedGroupOnly.AutoSize = true;
             this.radioButtonSelectedGroupOnly.Checked = true;
-            this.radioButtonSelectedGroupOnly.Location = new System.Drawing.Point(17, 26);
+            this.radioButtonSelectedGroupOnly.Location = new System.Drawing.Point(6, 26);
             this.radioButtonSelectedGroupOnly.Name = "radioButtonSelectedGroupOnly";
             this.radioButtonSelectedGroupOnly.Size = new System.Drawing.Size(132, 23);
             this.radioButtonSelectedGroupOnly.TabIndex = 1;
@@ -163,7 +175,7 @@
             // radioButtonAllData
             // 
             this.radioButtonAllData.AutoSize = true;
-            this.radioButtonAllData.Location = new System.Drawing.Point(172, 26);
+            this.radioButtonAllData.Location = new System.Drawing.Point(6, 55);
             this.radioButtonAllData.Name = "radioButtonAllData";
             this.radioButtonAllData.Size = new System.Drawing.Size(79, 23);
             this.radioButtonAllData.TabIndex = 0;
@@ -180,6 +192,50 @@
             this.label1.Size = new System.Drawing.Size(323, 19);
             this.label1.TabIndex = 6;
             this.label1.Text = "グループ内オブジェクト";
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.label2.Location = new System.Drawing.Point(520, 6);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(182, 19);
+            this.label2.TabIndex = 7;
+            this.label2.Text = "データ内容";
+            // 
+            // groupBox2
+            // 
+            this.groupBox2.Controls.Add(this.radioButtonOutputAllData);
+            this.groupBox2.Controls.Add(this.radioButtonOutputOnlyDisplayedData);
+            this.groupBox2.Controls.Add(this.buttonOutputCsv);
+            this.groupBox2.Location = new System.Drawing.Point(708, 308);
+            this.groupBox2.Name = "groupBox2";
+            this.groupBox2.Size = new System.Drawing.Size(228, 94);
+            this.groupBox2.TabIndex = 8;
+            this.groupBox2.TabStop = false;
+            this.groupBox2.Text = "CSV出力";
+            // 
+            // radioButtonOutputAllData
+            // 
+            this.radioButtonOutputAllData.AutoSize = true;
+            this.radioButtonOutputAllData.Checked = true;
+            this.radioButtonOutputAllData.Location = new System.Drawing.Point(6, 55);
+            this.radioButtonOutputAllData.Name = "radioButtonOutputAllData";
+            this.radioButtonOutputAllData.Size = new System.Drawing.Size(79, 23);
+            this.radioButtonOutputAllData.TabIndex = 3;
+            this.radioButtonOutputAllData.TabStop = true;
+            this.radioButtonOutputAllData.Text = "全データ";
+            this.radioButtonOutputAllData.UseVisualStyleBackColor = true;
+            // 
+            // radioButtonOutputOnlyDisplayedData
+            // 
+            this.radioButtonOutputOnlyDisplayedData.AutoSize = true;
+            this.radioButtonOutputOnlyDisplayedData.Location = new System.Drawing.Point(6, 26);
+            this.radioButtonOutputOnlyDisplayedData.Name = "radioButtonOutputOnlyDisplayedData";
+            this.radioButtonOutputOnlyDisplayedData.Size = new System.Drawing.Size(119, 23);
+            this.radioButtonOutputOnlyDisplayedData.TabIndex = 2;
+            this.radioButtonOutputOnlyDisplayedData.Text = "表示データのみ";
+            this.radioButtonOutputOnlyDisplayedData.UseVisualStyleBackColor = true;
             // 
             // statusStrip1
             // 
@@ -199,15 +255,38 @@
             this.toolStripStatusLabel1.Size = new System.Drawing.Size(25, 20);
             this.toolStripStatusLabel1.Text = "    ";
             // 
-            // label2
+            // groupBox3
             // 
-            this.label2.AutoSize = true;
-            this.label2.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.label2.Location = new System.Drawing.Point(520, 6);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(419, 19);
-            this.label2.TabIndex = 7;
-            this.label2.Text = "データ内容";
+            this.groupBox3.Controls.Add(this.radioButtonUtf8);
+            this.groupBox3.Controls.Add(this.radioButtonShiftJis);
+            this.groupBox3.Location = new System.Drawing.Point(520, 308);
+            this.groupBox3.Name = "groupBox3";
+            this.groupBox3.Size = new System.Drawing.Size(182, 94);
+            this.groupBox3.TabIndex = 9;
+            this.groupBox3.TabStop = false;
+            this.groupBox3.Text = "エンコード";
+            // 
+            // radioButtonShiftJis
+            // 
+            this.radioButtonShiftJis.AutoSize = true;
+            this.radioButtonShiftJis.Location = new System.Drawing.Point(6, 26);
+            this.radioButtonShiftJis.Name = "radioButtonShiftJis";
+            this.radioButtonShiftJis.Size = new System.Drawing.Size(93, 23);
+            this.radioButtonShiftJis.TabIndex = 0;
+            this.radioButtonShiftJis.Text = "Shift-JIS";
+            this.radioButtonShiftJis.UseVisualStyleBackColor = true;
+            // 
+            // radioButtonUtf8
+            // 
+            this.radioButtonUtf8.AutoSize = true;
+            this.radioButtonUtf8.Checked = true;
+            this.radioButtonUtf8.Location = new System.Drawing.Point(6, 55);
+            this.radioButtonUtf8.Name = "radioButtonUtf8";
+            this.radioButtonUtf8.Size = new System.Drawing.Size(69, 23);
+            this.radioButtonUtf8.TabIndex = 1;
+            this.radioButtonUtf8.TabStop = true;
+            this.radioButtonUtf8.Text = "UTF8";
+            this.radioButtonUtf8.UseVisualStyleBackColor = true;
             // 
             // Form1
             // 
@@ -228,8 +307,12 @@
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewData)).EndInit();
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
+            this.groupBox2.ResumeLayout(false);
+            this.groupBox2.PerformLayout();
             this.statusStrip1.ResumeLayout(false);
             this.statusStrip1.PerformLayout();
+            this.groupBox3.ResumeLayout(false);
+            this.groupBox3.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -238,7 +321,7 @@
         #endregion
 
         private System.Windows.Forms.DataGridView dataGridViewDropHdf5;
-        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button buttonOutputCsv;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
         private System.Windows.Forms.StatusStrip statusStrip1;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel1;
@@ -250,6 +333,12 @@
         private System.Windows.Forms.RadioButton radioButtonAllData;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.GroupBox groupBox2;
+        private System.Windows.Forms.RadioButton radioButtonOutputAllData;
+        private System.Windows.Forms.RadioButton radioButtonOutputOnlyDisplayedData;
+        private System.Windows.Forms.GroupBox groupBox3;
+        private System.Windows.Forms.RadioButton radioButtonUtf8;
+        private System.Windows.Forms.RadioButton radioButtonShiftJis;
     }
 }
 

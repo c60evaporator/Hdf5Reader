@@ -79,7 +79,9 @@ namespace HDF5Reader
         private void dataGridViewGroupDetail_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
             var selectedName = dataGridViewGroupDetail[0, e.RowIndex].Value.ToString();
-            hdf5Reader.MoveToSelectedGroupOrData(selectedName, radioButtonSelectedGroupOnly.Checked);
+            Encoding enc = Encoding.GetEncoding("Shift_JIS");
+            if(radioButtonUtf8.Checked) enc = Encoding.GetEncoding("UTF-8");
+            hdf5Reader.MoveToSelectedGroupOrData(selectedName, radioButtonSelectedGroupOnly.Checked, enc);
         }
 
         //RadioButtonチェック変更時の処理
@@ -106,5 +108,9 @@ namespace HDF5Reader
             }
         }
 
+        private void buttonOutputCsv_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }

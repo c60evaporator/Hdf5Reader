@@ -13,6 +13,7 @@ namespace HDF5Reader
         //HDF5はこちら参考 http://memo-memo-and-memo.asablo.jp/blog/2013/02/06/6714210
         //定数
         private List<H5T.H5TClass> VALUE_H5TCLASSES = new List<H5T.H5TClass>() { H5T.H5TClass.FLOAT, H5T.H5TClass.INTEGER };//値型として扱うH5TClass
+        private List<H5T.H5TClass> STR_H5TClLASSES = new List<H5T.H5TClass>() { H5T.H5TClass.STRING };//文字列型として扱うH5TClass
         private List<H5T.H5TClass> MATRIX_H5TCLASSES = new List<H5T.H5TClass>() { H5T.H5TClass.COMPOUND };//行列型として扱うH5TClass
         //クラス内変数
         private string _hdf5Path;//読み込んだHDF5ファイルのパス
@@ -24,7 +25,8 @@ namespace HDF5Reader
         private H5FileId _fileId;//読み込んだHDF5ファイルのFileID
         private List<string> _groupList;//グループ一覧
         private List<string> _dataList;//データ一覧
-        private string _currentGroup;//現在
+        private string _currentGroup;//現在DataGridViewに表示中のグループ名
+        private string _currentData;//現在DataGridViewに表示中のデータ名
 
         //コンストラクタ
         public Hdf5Reader(
@@ -211,7 +213,7 @@ namespace HDF5Reader
         }
 
         //DataGridViewGroupDetailをダブルクリックしたときの処理（下位グループ表示 or 上位グループに戻る or データを表示）
-        public void MoveToSelectedGroupOrData(string selectedRow, bool selectedGroupOnly)
+        public void MoveToSelectedGroupOrData(string selectedRow, bool selectedGroupOnly, Encoding enc)
         {
             //グループを移動（「選択グループのみ」がチェックされているときのみ）
             if (selectedGroupOnly)
@@ -222,12 +224,14 @@ namespace HDF5Reader
                 else if (selectedRow == "戻る") DisplayUpperGroup(selectedRow);
             }
             //データを表示
-            if (_dataList.Contains(selectedRow)) DisplayData(selectedRow);
+            if (_dataList.Contains(selectedRow)) DisplayData(selectedRow, enc);
         }
 
         //DataSetの内容をDataGridViewに表示
-        private void DisplayData(string datasetName)
+        private void DisplayData(string datasetName, Encoding enc)
         {
+            //現在表示中のデータ名を更新
+            _currentData = datasetName;
             //hdf5ファイルのDataSetを開く
             var dataSetId = H5D.open(_fileId, datasetName);
             var dataTypeId = H5D.getType(dataSetId);
@@ -236,7 +240,28 @@ namespace HDF5Reader
             //列数、行数のカウント
             int colSize = 1;
             if(MATRIX_H5TCLASSES.Contains(cls)) colSize = H5T.getNMembers(dataTypeId);
-            var rowSize = H5S.getSimpleExtentDims(space).First();
+            long rowSize = H5S.getSimpleExtentDims(space).First();
+            //データ格納
+            string[,] displayArray;
+            //文字列のとき
+            if (STR_H5TClLASSES.Contains(cls))
+            {
+                displayArray = GetArrayFromStrDataSet(dataSetId, dataTypeId, enc, rowSize);
+            }
+            //数値のとき
+            else
+            {
+                displayArray = GetArrayFromValueDataSet(dataSetId, dataTypeId, colSize, rowSize);
+            }
+            //DataGridViewに表示
+            DisplayStrSquareArrayToDataGrid(displayArray, _dataGridViewData);
+            H5S.close(space);
+            H5T.close(dataTypeId);
+            H5D.close(dataSetId);
+        }
+
+        private string[,] GetArrayFromValueDataSet(H5DataSetId dataSetId, H5DataTypeId dataTypeId, int colSize, long rowSize)
+        {
             //データ格納
             double[] doubleArray = new double[colSize * rowSize];//データ格納用配列
             H5Array<double> array = new H5Array<double>(doubleArray);
@@ -251,11 +276,30 @@ namespace HDF5Reader
                     displayArray[j, i] = doubleArray[j + i * colSize].ToString();
                 }
             }
-            //DataGridViewに表示
-            DisplayStrSquareArrayToDataGrid(displayArray, _dataGridViewData);
-            H5S.close(space);
-            H5T.close(dataTypeId);
-            H5D.close(dataSetId);
+            return displayArray;
+        }
+
+        private string[,] GetArrayFromStrDataSet(H5DataSetId dataSetId, H5DataTypeId dataTypeId, Encoding enc, long rowSize)
+        {
+            //いったんByte配列に格納
+            int strSize = H5T.getSize(dataTypeId);//文字のバイト数
+            byte[] byteArray = new byte[strSize * rowSize];
+            H5Array<byte> array = new H5Array<byte>(byteArray);
+            H5D.read(dataSetId, dataTypeId, array);
+            //stringに変換し配列に格納
+            string[,] displayArray = new string[1, rowSize];
+            List<byte> byteList = byteArray.ToList();
+            for (int i = 0; i < rowSize; i++)
+            {
+                var strArray = byteList.GetRange(i * strSize, strSize).ToArray();
+                displayArray[0, i] = enc.GetString(strArray);
+            }
+            return displayArray;
+        }
+
+        public void OutputData(string datasetName)
+        {
+
         }
     }
 }
