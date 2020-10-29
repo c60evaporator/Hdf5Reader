@@ -110,7 +110,9 @@ namespace HDF5Reader
 
         private void buttonOutputCsv_Click(object sender, EventArgs e)
         {
-
+            Encoding enc = Encoding.GetEncoding("Shift_JIS");
+            if (radioButtonUtf8.Checked) enc = Encoding.GetEncoding("UTF-8");
+            hdf5Reader.OutputData(radioButtonOutputAllData.Checked, enc);
         }
     }
 }

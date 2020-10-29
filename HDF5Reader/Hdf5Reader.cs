@@ -25,8 +25,8 @@ namespace HDF5Reader
         private H5FileId _fileId;//読み込んだHDF5ファイルのFileID
         private List<string> _groupList;//グループ一覧
         private List<string> _dataList;//データ一覧
-        private string _currentGroup;//現在DataGridViewに表示中のグループ名
-        private string _currentData;//現在DataGridViewに表示中のデータ名
+        private string _currentGroup = null;//現在DataGridViewに表示中のグループ名
+        private string _currentData = null;//現在DataGridViewに表示中のデータ名
 
         //コンストラクタ
         public Hdf5Reader(
@@ -232,14 +232,22 @@ namespace HDF5Reader
         {
             //現在表示中のデータ名を更新
             _currentData = datasetName;
+            //DataSetの内容を配列に格納
+            string[,] displayArray = GetArrayFromDataSet(datasetName, enc);
+            //DataGridViewに表示
+            DisplayStrSquareArrayToDataGrid(displayArray, _dataGridViewData);
+        }
+
+        private string[,] GetArrayFromDataSet(string dataSetName, Encoding enc)
+        {
             //hdf5ファイルのDataSetを開く
-            var dataSetId = H5D.open(_fileId, datasetName);
+            var dataSetId = H5D.open(_fileId, dataSetName);
             var dataTypeId = H5D.getType(dataSetId);
             var space = H5D.getSpace(dataSetId);
             var cls = H5T.getClass(dataTypeId);
             //列数、行数のカウント
             int colSize = 1;
-            if(MATRIX_H5TCLASSES.Contains(cls)) colSize = H5T.getNMembers(dataTypeId);
+            if (MATRIX_H5TCLASSES.Contains(cls)) colSize = H5T.getNMembers(dataTypeId);
             long rowSize = H5S.getSimpleExtentDims(space).First();
             //データ格納
             string[,] displayArray;
@@ -253,11 +261,10 @@ namespace HDF5Reader
             {
                 displayArray = GetArrayFromValueDataSet(dataSetId, dataTypeId, colSize, rowSize);
             }
-            //DataGridViewに表示
-            DisplayStrSquareArrayToDataGrid(displayArray, _dataGridViewData);
             H5S.close(space);
             H5T.close(dataTypeId);
             H5D.close(dataSetId);
+            return displayArray;
         }
 
         private string[,] GetArrayFromValueDataSet(H5DataSetId dataSetId, H5DataTypeId dataTypeId, int colSize, long rowSize)
@@ -297,9 +304,72 @@ namespace HDF5Reader
             return displayArray;
         }
 
-        public void OutputData(string datasetName)
+        public void OutputData(bool outputAllData, Encoding enc)
         {
+            //出力先のディレクトリを指定
+            string outDir;//フォルダ名格納用変数
+            using (FolderBrowserDialog dlg = new FolderBrowserDialog())//フォルダ指定用ダイアログを開く
+            {
+                if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.Cancel) { return; }//ダイアログの表示
+                outDir = dlg.SelectedPath;//フォルダ名を格納
+            }
 
+            //Groupに相当するディレクトリを作成
+            //全データ出力時
+            if (outputAllData)
+            {
+                foreach (var group in _groupList)
+                {
+                    System.IO.Directory.CreateDirectory(outDir + "/" + group.Replace("./", ""));
+                }
+            }
+            //表示データのみ出力時
+            else if (_currentGroup != null)
+            {
+                System.IO.Directory.CreateDirectory(outDir + "/" + _currentGroup.Replace("./", ""));
+            }
+
+            //DataSetに相当するデータをCSV出力
+            //全データ出力時
+            if (outputAllData)
+            {
+                foreach (var dataSet in _dataList)
+                {
+                    OutputDataSetToCsv(outDir, dataSet, enc);
+                }
+            }
+            //表示データのみ出力時
+            else if (_currentData != null)
+            {
+                OutputDataSetToCsv(outDir, _currentData, enc);
+            }
+        }
+
+        private void OutputDataSetToCsv(string saveDir, string dataSetName, Encoding enc)
+        {
+            //DataSetの内容を配列に格納
+            string[,] displayArray = GetArrayFromDataSet(dataSetName, enc);
+            var colSize = displayArray.GetLength(0);
+            var rowSize = displayArray.GetLength(1);
+
+            //DataSet名
+            string savePath = saveDir + "/" + dataSetName.Replace("./", "") + ".csv";
+
+            //CSV出力
+            using (System.IO.StreamWriter sw = new System.IO.StreamWriter(savePath, false, enc))
+            {
+                //行を走査
+                for (int i = 0; i < rowSize; i++)
+                {
+                    //1行分の文字列を作成
+                    List<string> rowString = new List<string>();
+                    for (int j = 0; j < colSize; j++)
+                    {
+                        rowString.Add(displayArray[j, i]);
+                    }
+                    sw.WriteLine(string.Join(",", rowString));
+                }
+            }
         }
     }
 }
