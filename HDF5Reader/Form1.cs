@@ -19,7 +19,7 @@ namespace HDF5Reader
         
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
-            hdf5Reader.CloseHdf5();
+            if(hdf5Reader != null) hdf5Reader.CloseHdf5();
         }
 
         private void dataGridViewDropHdf5_DragDrop(object sender, DragEventArgs e)
