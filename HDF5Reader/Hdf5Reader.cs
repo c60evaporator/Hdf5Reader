@@ -5,6 +5,7 @@ using System.Text;
 using System.Windows.Forms;
 using HDF5DotNet;
 using System.Data;
+using System.Drawing;
 
 namespace HDF5Reader
 {
@@ -179,6 +180,7 @@ namespace HDF5Reader
         public void DisplayAllData()
         {
             DisplayStrListToDataGrid(_dataList, _dataGridViewGroupDetail, "データ一覧", false);
+            for (int i = 0; i < _dataList.Count; i++) _dataGridViewGroupDetail[0, i].Style.BackColor = Color.PaleGreen;
         }
 
         //グループ内の下位グループ＆データをDataGridViewに表示
@@ -196,6 +198,12 @@ namespace HDF5Reader
                 .ToList();
             //下位グループと下位データ一覧をDataGridViewに表示
             DisplayStrListToDataGrid(lowerGroups.Concat(lowerData).ToList(), _dataGridViewGroupDetail, "下位グループとデータ一覧", true);
+            //ファイル名をベージュ、データ名を緑色に塗りつぶし
+            for(int i = 0; i < lowerGroups.Count + lowerData.Count; i++)
+            {
+                if(i < lowerGroups.Count) _dataGridViewGroupDetail[0, i + 1].Style.BackColor = Color.LemonChiffon;
+                else _dataGridViewGroupDetail[0, i + 1].Style.BackColor = Color.PaleGreen;
+            }
         }
 
         //上位グループの内容をDataGridViewに表示
