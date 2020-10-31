@@ -138,13 +138,17 @@ namespace HDF5Reader
         }
 
         //2次元配列をデータテーブルに一覧表示
-        private void DisplayStrSquareArrayToDataGrid(string[,] strArray, DataGridView dataGridView)
+        private void DisplayStrSquareArrayToDataGrid(string[,] strArray, List<string> colNames, DataGridView dataGridView)
         {
             DataTable dataTable = new DataTable();
             var colSize = strArray.GetLength(0);
             var rowSize = strArray.GetLength(1);
             //カラムを追加
-            for(int j = 0; j < colSize; j++) dataTable.Columns.Add((j + 1).ToString());
+            for (int j = 0; j < colSize; j++)
+            {
+                if(colNames is null) dataTable.Columns.Add((j + 1).ToString());
+                else dataTable.Columns.Add(colNames[j]);
+            }
             //行を追加
             for (int i = 0; i < rowSize; i++)
             {
@@ -161,13 +165,14 @@ namespace HDF5Reader
                 dataGridView.Rows[i].HeaderCell.Value = (i + 1).ToString();
             }
             dataGridView.RowHeadersWidth = 60;
-            //列幅をDataGridViewの幅に合わせ、列名＆行名表示OFFに
+            //列幅をDataGridViewの幅に合わせ、行名表示OFFに(列名表示もNULLに)
             dataGridView.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-            dataGridView.ColumnHeadersVisible = false;
             dataGridView.AllowUserToAddRows = false;
             dataGridView.AllowUserToDeleteRows = false;
             dataGridView.AllowUserToResizeRows = false;
             dataGridView.ReadOnly = true;
+            if (colNames is null) dataGridView.ColumnHeadersVisible = false;
+            else dataGridView.ColumnHeadersVisible = true;
         }
 
         //全データをDataGridViewGroupDetailに表示
@@ -234,8 +239,10 @@ namespace HDF5Reader
             _currentData = datasetName;
             //DataSetの内容を配列に格納
             string[,] displayArray = GetArrayFromDataSet(datasetName, enc);
+            //列名を配列に格納
+            List<string> colNames = GetColNames(datasetName);
             //DataGridViewに表示
-            DisplayStrSquareArrayToDataGrid(displayArray, _dataGridViewData);
+            DisplayStrSquareArrayToDataGrid(displayArray, colNames, _dataGridViewData);
         }
 
         private string[,] GetArrayFromDataSet(string dataSetName, Encoding enc)
@@ -302,6 +309,23 @@ namespace HDF5Reader
                 displayArray[0, i] = enc.GetString(strArray);
             }
             return displayArray;
+        }
+
+        private List<string> GetColNames(string dataSetName)
+        {
+            //hdf5ファイルのDataSetを開く
+            var dataSetId = H5D.open(_fileId, dataSetName);
+            var dataTypeId = H5D.getType(dataSetId);
+            var cls = H5T.getClass(dataTypeId);
+            //列名の取得(COMPOUNDデータタイプのみ)
+            List<string> colNames = null;
+            if (MATRIX_H5TCLASSES.Contains(cls))
+            {
+                int colSize = H5T.getNMembers(dataTypeId);
+                colNames = new List<string>();
+                for (int j = 0; j < colSize; j++) colNames.Add(H5T.getMemberName(dataTypeId, j));
+            }
+            return colNames;
         }
 
         public void OutputData(bool outputAllData, Encoding enc)
